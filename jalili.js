@@ -1,6 +1,10 @@
-(function(window){
+(function(global){
 
 	"use strict";
+
+	var version = "1.0";
+	var doc = global.document;
+	var toString = Object.toString;
 
 	var Jalili = function(selector) {
 		return new Jalili._proto_.boot(selector);
@@ -8,9 +12,15 @@
 
 	//Define properties and methods for internal use only
 	Jalili._proto_ = Jalili.prototype = {
+		version : version,
+
 		constructor : Jalili,
 
+		length : 0,
+
 		boot : function(selector) {
+			selector = selector;
+
 			return Jalili;
 		}
 	}
@@ -24,6 +34,40 @@
 
 		return o;
 	}
+
+	Jalili.extend(global, {
+		isArray : function(a) {
+	  	return toString.call(a) === '[object Array]' || toString.call(a) === '[object NodeList]';
+		},
+
+		isInt : function(o) {
+			return typeof o === 'number';
+		},
+
+		isString : function(o) {
+			return typeof o === 'string';
+		},
+
+		isObject : function(o) {
+			return toString.call(o) === '[object Object]';
+		},
+
+		isNull : function(o) {
+			return o === null;
+		},
+
+		isUndefined : function(o) {
+			return typeof o === 'undefined';
+		},
+
+		isFunction : function(o) {
+			return typeof o === 'function' && !isInt(o.nodeType);
+		},
+
+		isWindow : function(o) {
+			return !isNull(o) && o === o.global;
+		}
+	});
 
 	//Copy the properties of p to o, and return o.
 	//If o and p have a property by the same name, o's property is used.
@@ -72,7 +116,7 @@
 
 	//Return an array containing names of own properties of o
 	Jalili.keys = function(o) {
-		if (typeof o !== "object") {
+		if (!isObject(o)) {
 			throw TypeError();
 		}
 
@@ -86,8 +130,18 @@
 
 		return result;
 	}
+
+	//freeze objects to make its properties non-configurable
+	Jalili.freeze = function(o) {
+		if (isObject(o)) {
+			Object.freeze(o);
+		}
+	}
 	
-	window.$ = window.Jalili = Jalili;
+	Jalili.version = version;
+	Object.freeze(Jalili);
+
+	global.$ = global.Jalili = Jalili;
 
 	return Jalili;
 })(window);
