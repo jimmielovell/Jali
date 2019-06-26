@@ -1,0 +1,26 @@
+{
+  "name": "jalili",
+  "version": "1.0.0",
+  "description": "This is a lightweight Javascript Library",
+  "main": "jalili.js",
+  "scripts": {
+    "test": "$"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimmielovell/Jalili.git"
+  },
+  "keywords": [
+    "Jalili"
+  ],
+  "author": "Jimmie Lovell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jimmielovell/Jalili/issues"
+  },
+  "homepage": "https://github.com/jimmielovell/Jalili#readme",
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-plugin-react": "^7.14.2"
+  }
+}
