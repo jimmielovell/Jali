@@ -9,6 +9,42 @@
 	var proto = Object.getPrototypeOf;
 	var hasOwnProp = hlpObj.hasOwnProperty;
 
+	function isArray(a) {
+		return toString.call(a) === '[object Array]' || toString.call(a) === '[object NodeList]';
+	}
+
+	function isInt(o) {
+		return typeof o == 'number';
+	}
+
+	function isString(o) {
+		return typeof o === 'string';
+	}
+
+	function isObject(o) {
+		return toString.call(o) === '[object Object]';
+	}
+
+	function isNull(o) {
+		return o === null;
+	}
+
+	function isUndefined(o) {
+		return typeof o === 'undefined';
+	}
+
+	function isFunction(o) {
+		return typeof o === 'function' && typeof o.nodeType !== 'number';
+	}
+
+	function isWindow(o) {
+		return o !== null && o === o.window;
+	}
+
+	function empty(o) {
+		return o.length == 0;
+	}
+
 	function Jalili(selector) {
 		return init(selector);
 	}
@@ -23,12 +59,10 @@
 		F.prototype = Jalili;
 		var jalili = new F();
 
-		if (!glob.isUndefined(selector) || !glob.isNull(selector)) {
-			if (glob.isString(selector)) {
+		if (!isUndefined(selector) || !isNull(selector)) {
+			if (isString(selector)) {
 				var nodes =  doc.querySelectorAll(selector);
-				//proto(nodes).each = jalili.each;
 				nodes = jalili.merge(jalili, nodes);
-
 				if (nodes.length > 0) {
 					if (nodes.length > 1) {
 						nodes.each(function(node) {
@@ -42,9 +76,9 @@
 
 					return jalili[0];
 				}
-			} else if (glob.isFunction(selector)) {
+			} else if (isFunction(selector)) {
 				selector();
-			} else if (glob.isArray(selector) || glob.isObject(selector)) {
+			} else if (isArray(selector) || isObject(selector)) {
 				jalili[0] = selector;
 			}
 		}
@@ -56,7 +90,6 @@
 	//If o and p have a property by the same name, o's property is overwritten.
 	Jalili.extend = function(p, o) {
 		o = o || this;
-
 		for(var prop in p) {
 			o[prop] = p[prop];
 		}
@@ -64,49 +97,10 @@
 		return o;
 	};
 
-	Jalili.extend({
-		isArray : function(a) {
-			return toString.call(a) === '[object Array]' || toString.call(a) === '[object NodeList]';
-		},
-
-		isInt : function(o) {
-			return typeof o === 'number';
-		},
-
-		isString : function(o) {
-			return typeof o === 'string';
-		},
-
-		isObject : function(o) {
-			return toString.call(o) === '[object Object]';
-		},
-
-		isNull : function(o) {
-			return o === null;
-		},
-
-		isUndefined : function(o) {
-			return typeof o === 'undefined';
-		},
-
-		isFunction : function(o) {
-			return typeof o === 'function' && !glob.isInt(o.nodeType);
-		},
-
-		isWindow : function(o) {
-			return !glob.isNull(o) && o === o.glob;
-		},
-
-		empty : function(o) {
-			return o.length == 0;
-		}
-	}, glob);
-
 	//Copy the properties of p to o, and return o.
 	//If o and p have a property by the same name, o's property is used.
 	Jalili.merge = function(p, o) {
 		o = o || this;
-
 		for(var prop in p) {
 			if (hasOwnProp.call(o, prop)) {
 				continue;
@@ -155,10 +149,9 @@
 
 	//Return an array containing names of own properties of o
 	Jalili.keys = function(o) {
-		if (!glob.isObject(o)) {
+		if (!isObject(o)) {
 			throw TypeError();
 		}
-
 		var result = [];
 
 		for (var prop in o) {
@@ -170,40 +163,42 @@
 		return result;
 	};
 
+	/*
+	 *ARRAY MANIPULATION
+	 */
 	Jalili.pop = function() {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			return this[0].pop();
 		}
 	};
 
 	Jalili.push = function(x) {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			return this[0].push(x);
 		}
 	};
 
 	Jalili.join = function() {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			return this[0].join();
 		}
 	};
 
 	Jalili.shift = function() {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			return this[0].shift();
 		}
 	};
 
 	Jalili.unshift = function(x) {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			return this[0].unshift(x);
 		}
 	};
 
 	Jalili.replace = function(i, x) {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			var l = this[0].length;
-
 			if (Math.abs(i) >= l) {
 				throw "Index out of bounds.";
 			}
@@ -211,7 +206,6 @@
 			if (i < 0) {
 				i = l+i;
 			}
-
 			this[0][i] = x;
 
 			return this[0];
@@ -219,9 +213,8 @@
 	};
 
 	Jalili.splice = function(i, n) {
-		if (glob.isArray(this[0])) {
+		if (isArray(this[0])) {
 			var l = this[0].length;
-
 			if (Math.abs(i) >= l) {
 				throw "Index out of bounds.";
 			}
@@ -235,11 +228,10 @@
 	};
 
 	Jalili.concat = function() {
-		if (!glob.empty(arguments)) {
-			var arr = glob.isArray(this[0])? this[0] : [];
-
+		if (!empty(arguments)) {
+			var arr = isArray(this[0])? this[0] : [];
 			for (var i = 0; i < arguments.length; i++) {
-				if (glob.isArray(arguments[i])) {
+				if (isArray(arguments[i])) {
 					arr = arr.concat(arguments[i]);
 				}
 			}
@@ -249,10 +241,9 @@
 	};
 
 	Jalili.each = function(c) {
-		if (glob.isUndefined(c)) {
+		if (isUndefined(c)) {
 			return this;
 		}
-
 		proto(arr).forEach.call(this, c);
 	};
 
@@ -273,7 +264,7 @@
 
 	//freeze objects to make its properties non-configurable
 	Jalili.freeze = function(o) {
-		if (glob.isObject(o)) {
+		if (isObject(o)) {
 			Object.freeze(o);
 		}
 	};
@@ -283,16 +274,29 @@
 		if (Object.create) {
 			return Object.create(this);
 		}
-
 		function F(){}
 		F.prototype = this;
 
 		return new F();
 	};
+
+	//Extend the global object and add the jalili object to the
+	//global namespace
+	Jalili.extend({
+		isArray : isArray,
+		isInt : isInt,
+		isString : isString,
+		isObject : isObject,
+		isNull : isNull,
+		isUndefined : isUndefined,
+		isFunction : isFunction,
+		isWindow : isWindow,
+		empty : empty,
+		Jalili : Jalili,
+		$ : Jalili
+	}, glob);
 	
 	Object.freeze(Jalili);
-
-	glob.$ = glob.Jalili = Jalili;
 
 	return Jalili;
 })(undefined !== window? window : this);
