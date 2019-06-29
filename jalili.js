@@ -2,17 +2,18 @@
 
 	"use strict";
 
-	var version = "1.0";
+	var arr = [];
+	var hlpObj = {};
 	var doc = glob.document;
-	var objProto = objProto;
-	var toString = objProto.toString;
+	var toString = ({}).toString;
+	var proto = Object.getPrototypeOf;
+	var hasOwnProp = hlpObj.hasOwnProperty;
 
 	function Jalili(selector) {
 		return init(selector);
 	}
 
 	Jalili.prototype = {
-		version : version,
 		constructor : Jalili,
 		length : 0,
 	};
@@ -25,9 +26,19 @@
 		if (!glob.isUndefined(selector) || !glob.isNull(selector)) {
 			if (glob.isString(selector)) {
 				var nodes =  doc.querySelectorAll(selector);
+				//proto(nodes).each = jalili.each;
+				nodes = jalili.merge(jalili, nodes);
 
-				if (!glob.empty(nodes)) {
-					jalili[0] = nodes.length == 1? nodes[0] : nodes;
+				if (nodes.length > 0) {
+					if (nodes.length > 1) {
+						nodes.each(function(node) {
+							node = jalili.merge(jalili, node);
+						});
+
+						jalili[0] = proto(arr).slice.call(nodes);
+					} else {
+						jalili[0] = nodes;
+					}
 
 					return jalili[0];
 				}
@@ -45,6 +56,7 @@
 	//If o and p have a property by the same name, o's property is overwritten.
 	Jalili.extend = function(p, o) {
 		o = o || this;
+
 		for(var prop in p) {
 			o[prop] = p[prop];
 		}
@@ -87,155 +99,162 @@
 
 		empty : function(o) {
 			return o.length == 0;
-		},
-
-		each : function(arr, c) {
-			Array.prototype.forEach.call(this, c);
 		}
 	}, glob);
 
-	Jalili.extend({
-		//Copy the properties of p to o, and return o.
-		//If o and p have a property by the same name, o's property is used.
-		merge : function(p, o) {
-			o = o || this;
-			for(var prop in p) {
-				if (o.hasOwnProperty[prop]) {
-					continue;
-				}
+	//Copy the properties of p to o, and return o.
+	//If o and p have a property by the same name, o's property is used.
+	Jalili.merge = function(p, o) {
+		o = o || this;
 
-				o[prop] = p[prop];
+		for(var prop in p) {
+			if (hasOwnProp.call(o, prop)) {
+				continue;
 			}
 
-			return o;
-		},
+			o[prop] = p[prop];
+		}
 
-		//Remove properties from o if there is not a property with the same name in p.
-		restrict : function(o, p) {
-			for(var prop in o) {
-				if (!(prop in p)) {
-					delete o[prop];
-				}
-			}
+		return o;
+	};
 
-			return o;
-		},
-
-		//For each property of p, delete a property with the same name from o.
-		subtract : function(o, p) {
-			for(var prop in p) {
+	//Remove properties from o if there is not a property with the same name in p.
+	Jalili.restrict = function(o, p) {
+		for(var prop in o) {
+			if (!(prop in p)) {
 				delete o[prop];
 			}
-
-			return o;
-		},
-
-		//Return a new object holding properties of both o and p.
-		//If o and p have properties by the same name, values from o are used.
-		union : function(p, o) {
-			o = o || this;
-
-			return this.extend(this.extend({},o), p);
-		},
-
-		//Return a new object that holds only properties of o also appearing in p
-		intersection : function(p, o) {
-			o = o || this;
-
-			return this.restrict(this.extend({}, o), p);
-		},
-
-		//Return an array containing names of own properties of o
-		keys : function(o) {
-			if (!glob.isObject(o)) {
-				throw TypeError();
-			}
-			var result = [];
-			for (var prop in o) {
-				if (objProto.hasOwnProperty.call(o, prop)) {
-					result.push(prop);
-				}
-			}
-
-			return result;
 		}
-	});
 
-	Jalili.extend({
-		pop : function() {
-			if (glob.isArray(this[0])) {
-				return this[0].pop();
-			}
-		},
+		return o;
+	};
 
-		push : function(x) {
-			if (glob.isArray(this[0])) {
-				return this[0].push(x);
-			}
-		},
+	//For each property of p, delete a property with the same name from o.
+	Jalili.subtract = function(o, p) {
+		for(var prop in p) {
+			delete o[prop];
+		}
 
-		join : function() {
-			if (glob.isArray(this[0])) {
-				return this[0].join();
-			}
-		},
+		return o;
+	};
 
-		shift : function() {
-			if (glob.isArray(this[0])) {
-				return this[0].shift();
-			}
-		},
+	//Return a new object holding properties of both o and p.
+	//If o and p have properties by the same name, values from o are used.
+	Jalili.union = function(p, o) {
+		o = o || this;
 
-		unshift : function(x) {
-			if (glob.isArray(this[0])) {
-				return this[0].unshift(x);
-			}
-		},
+		return this.extend(p, this.extend({},o));
+	};
 
-		replace : function(i, x) {
-			if (glob.isArray(this[0])) {
-				var l = this[0].length;
-				if (Math.abs(i) >= l) {
-					throw "Index out of bounds.";
-				}
+	//Return a new object that holds only properties of o also appearing in p
+	Jalili.intersection = function(p, o) {
+		o = o || this;
 
-				if (i < 0) {
-					i = l+i;
-				}
-				this[0][i] = x;
+		return this.restrict(p, this.extend({}, o));
+	};
 
-				return this[0];
-			}
-		},
+	//Return an array containing names of own properties of o
+	Jalili.keys = function(o) {
+		if (!glob.isObject(o)) {
+			throw TypeError();
+		}
 
-		splice : function(i, n) {
-			if (glob.isArray(this[0])) {
-				var l = this[0].length;
-				if (Math.abs(i) >= l) {
-					throw "Index out of bounds.";
-				}
+		var result = [];
 
-				return this[0].splice(i, Math.abs(n));
-			}
-		},
-
-		delete : function(i) {
-			return this.splice(i, 1);
-		},
-
-		concat : function() {
-			if (!glob.empty(arguments)) {
-				var arr = glob.isArray(this[0])? this[0] : [];
-				for (var i = 0; i < arguments.length; i++) {
-					if (glob.isArray(arguments[i])) {
-						arr = arr.concat(arguments[i]);
-					}
-				}
-
-				return arr;
+		for (var prop in o) {
+			if (hasOwnProp.call(o, prop)) {
+				result.push(prop);
 			}
 		}
-	});
+
+		return result;
+	};
+
+	Jalili.pop = function() {
+		if (glob.isArray(this[0])) {
+			return this[0].pop();
+		}
+	};
+
+	Jalili.push = function(x) {
+		if (glob.isArray(this[0])) {
+			return this[0].push(x);
+		}
+	};
+
+	Jalili.join = function() {
+		if (glob.isArray(this[0])) {
+			return this[0].join();
+		}
+	};
+
+	Jalili.shift = function() {
+		if (glob.isArray(this[0])) {
+			return this[0].shift();
+		}
+	};
+
+	Jalili.unshift = function(x) {
+		if (glob.isArray(this[0])) {
+			return this[0].unshift(x);
+		}
+	};
+
+	Jalili.replace = function(i, x) {
+		if (glob.isArray(this[0])) {
+			var l = this[0].length;
+
+			if (Math.abs(i) >= l) {
+				throw "Index out of bounds.";
+			}
+
+			if (i < 0) {
+				i = l+i;
+			}
+
+			this[0][i] = x;
+
+			return this[0];
+		}
+	};
+
+	Jalili.splice = function(i, n) {
+		if (glob.isArray(this[0])) {
+			var l = this[0].length;
+
+			if (Math.abs(i) >= l) {
+				throw "Index out of bounds.";
+			}
+
+			return this[0].splice(i, Math.abs(n));
+		}
+	};
+
+	Jalili.delete = function(i) {
+		return this.splice(i, 1);
+	};
+
+	Jalili.concat = function() {
+		if (!glob.empty(arguments)) {
+			var arr = glob.isArray(this[0])? this[0] : [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				if (glob.isArray(arguments[i])) {
+					arr = arr.concat(arguments[i]);
+				}
+			}
+
+			return arr;
+		}
+	};
+
+	Jalili.each = function(c) {
+		if (glob.isUndefined(c)) {
+			return this;
+		}
+
+		proto(arr).forEach.call(this, c);
+	};
 
 	var UA = navigator.userAgent.toLowerCase(),
 		browMatch = /(webkit)[ /]([\w.]+)/.exec(UA) || 
@@ -272,8 +291,8 @@
 	};
 	
 	Object.freeze(Jalili);
+
 	glob.$ = glob.Jalili = Jalili;
-	Node.prototype.$ = glob.$;
 
 	return Jalili;
 })(undefined !== window? window : this);
