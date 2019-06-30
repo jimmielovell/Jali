@@ -1,2 +1,2 @@
-# Jalili
+# Jali
 A lightweight JavaScript Library
