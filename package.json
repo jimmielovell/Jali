@@ -1,26 +1,36 @@
 {
-  "name": "jali",
-  "version": "1.0.0",
-  "description": "This is a lightweight Javascript Library",
-  "main": "jali.js",
   "scripts": {
-    "test": "$"
+    "test": "jest"
   },
+  "jest": {
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/preset-env": "^7.5.5",
+    "babel-jest": "^24.8.0",
+    "babel-polyfill": "^6.26.0",
+    "jest": "^24.8.0"
+  },
+  "name": "jali",
+  "description": "**Jali** is a JavaScript library for querying DOM elements in a more elaborative and concise form.",
+  "version": "1.0.0",
+  "main": "lib/jali.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jimmielovell/Jali.git"
   },
   "keywords": [
-    "Jali"
+    "JavaScript",
+    "DOM Querying",
+    "DOM Traversal"
   ],
   "author": "Jimmie Lovell",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jimmielovell/Jali/issues"
   },
-  "homepage": "https://github.com/jimmielovell/Jali#readme",
-  "devDependencies": {
-    "eslint": "^6.0.1",
-    "eslint-plugin-react": "^7.14.2"
-  }
+  "homepage": "https://github.com/jimmielovell/Jali#readme"
 }
